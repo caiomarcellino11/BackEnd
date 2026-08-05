@@ -131,3 +131,12 @@ sem contar que a linguagem traz diversos recursos que facilitam e aceleram o pro
 ##### Criando minha primeira aplicação em PHP
 
 criando um Hello, World!!!
+
+##### Criando o perfil de PHPVanilla 
+
+-> Profile -> new profile 
+-> Extensions:
+- PHP interPhense( Ado Elefantinho): AutoCompletar (Snipets)
+- PHP Debug (Xdebug): acha Erros em Linha de Código
+- PHP CS FIXER: Formatação padrão do código (Identação)
+- PHP Server: Sobre um servidor Local para Acompanhamento em Tempo Real
