@@ -87,6 +87,8 @@ graph LR
   B --> |Response| A
   
 ```
+---
+
 #### Como Funciona na Prática o BackEnd
 
 - **Ação do Usuário**: Envia uma Solicitação pela UI(Interface do Usuário). Exemplo de UI: Tela do Celular, Navegador da Internet, Alexa ...
@@ -104,12 +106,6 @@ Os tipos de de requisição HTTP indicam a ação que o usuário deseja executar
 - **POST**: Enviar dados novos para *criar* algo ou processsar informações.
 - **PUT/PATCH**: Modificar dados já existentes. *PUT* Atualização Total dos dados. *PATCH* Atualização Parcial dos dados.
 - **DELETE**: Apaga um dado do servidor.
-
-
-
-
-
-
 ---
 
 #### iniciando o PHP
@@ -121,3 +117,17 @@ Os tipos de de requisição HTTP indicam a ação que o usuário deseja executar
 #### Instalando o PHP 
 
 - Fazer o download do PHP (php.net);
+- ZIP - non thread Safe 8.5 
+- descopactar o arquivo do PHP na pasta C:\src\php (Para descompactar, usar o 7Zip = Melhor)
+- modificar o arquivo php.ini -development para => php.ini (criar as configurações do PHP na máquina) - adicionar ou remover funcionalidade do PHP
+- Adicionar a pasta do PHP(C:\src\php) as variaveis de ambiente do Sistema (PATH)
+- verificar a instalação rodando o Comando php --version 
+
+##### Contextualizando o PHP
+
+o PHP de fato é uma das linguagens de Programção mais populares da atualizada. Ela permite que você crie aplicações web robustas, de uma maneira muito simplifica e direto ao ponto.
+sem contar que a linguagem traz diversos recursos que facilitam e aceleram o processo de desenvolvimento de sites e sistemas par web.E alêm do mais, ela ainda tem um ótimo ecossitema, uma excelente comunidade e um grande mercado de trabalho. 
+
+##### Criando minha primeira aplicação em PHP
+
+criando um Hello, World!!!
