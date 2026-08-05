@@ -27,6 +27,8 @@ Duração: 20 Semanas
 
 #### o que é BackEnd 
 
+```https://dontpad.com/diogotb``` site do diogo para entar no live share 
+
 O back-end é a parte de um site ou aplicativo que o usuário não vê, mas que faz tudo funcionar por trás das telas.
 
 - Guarda e organiza informações em um banco de dados;
@@ -85,6 +87,30 @@ graph LR
   B --> |Response| A
   
 ```
+
+#### Como Funciona na Prática o BackEnd
+
+- **Ação do Usuário**: Envia uma Solicitação pela UI(Interface do Usuário). Exemplo de UI: Tela do Celular, Navegador da Internet, Alexa ...
+- **envio do resição**: a UI transforma ação do Usuário em uma requisição: A UI transforma ação do Usuário em uma Requisição HTTP
+- O Processamento BackEnd: o Código Backend recebe o pedido, valida os dados e decide o que fazer (Ex: consulta uma informação no banco de dados)
+- **Resposta**: O  Servidor devolver o resultado para a UI (EX. em Login autorizado, uma compra confirmada, )
+
+```
+#### Tipos de Requisição HTTP
+
+Os tipos de de requisição HTTP indicam a ação que o usuário deseja executar no servidor. As principais ações são:
+
+- **GET**: pede dados de um lugar especifico. "Não faz alterações mo servidor"
+- **POST**: Enviar dados novos para *criar* algo ou processsar informações.
+- **PUT/PATCH**: Modificar dados já existentes.
+- **DELETE**: Apaga um dado do servidor .
+
+
+
+
+
+
+---
 
 #### iniciando o PHP
 
