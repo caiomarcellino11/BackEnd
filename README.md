@@ -159,6 +159,10 @@ após a criação
 - pode ser criada usando "const" ou "define"
 - não permitem interpolação 
 
+---
+
+### ### Semana 2 - Operadores em PHP (Aritméticos, Relacionais e Lógicos)
+
 ##### Estudo de Operadores
 
 **Aritméticos**: São usados para realizar cálculos.
@@ -201,3 +205,115 @@ Usados para comparar valores e retornar se é **true** e **false**
 - Operador NOT (Não) => ! : Inverte a lógica da Sentença
   - !true => false
   - !false => true
+
+### Semana 3 - Estrutura de controle de Dados (condicionais e Repetição)
+
+- **Conteúdo**: Estruturas `if`, `else`, `elseif`, Operadores ternários, `match`, loops `for`, `while` `do-while` e `foreach`
+
+#### Estrutura de controle de Dados ajudam no processo de automatização e, programas e sistemas
+
+##### Condicionais (IF, ELSE, ELSEIF)
+
+- **forma de uso**:
+
+- uso do `if` apenas 
+exemplo:aplicar um desconto de 10% em comrpas acima de 100 Reais; 
+
+```mermaid
+graph LR
+    A[comando] --> B[condição] --> C[Tomada de Decisão]
+
+```
+
+```php
+if ($valorCompra > 100) {
+  $valorCompra = $valorCompra * 0.1
+}
+```
+
+- Uso do `if` e do `else`
+Exemplo: Aplicar um desconto 10% para compras acima de 100 reais e 5% para as demais compras 
+
+```mermaid
+graph LR
+
+  A[comando] --> B{condição}
+  B --> |true| C[ação 1]
+  B --> |false| D[ação 2]
+
+
+```
+
+```php
+
+if($valorCompra > 100) {
+  $valorFinal = $valorCompra * 0.1
+} else{
+  $valorFinal = $valorCompra * 0.05;
+}
+
+
+```
+
+- Uso do `elseif` (Encadeado)
+Exemplo: Compras acima de 200 reais tem 15% de desconto, acima de 100 reais tem 10% de desconto e outras 5% de desconto
+
+```mermaid
+
+graph LR
+  A[comnando] --> B{condição}
+  B --> |true| C[ação 1]
+  B --> |false| D{Condição 2}
+  D --> |false| E[ação 2]
+  D --> |false| F[ação 3]
+
+```
+
+```php
+
+if ($valorCompra > 200){
+  $valorFinal = $valorCompra * 0.85;
+} elseif($valorCompra > 100) {
+  $valorFinal - $valorCompra * 0.9;
+}else {
+  $valorFinal = $valorCompra * 0.95;
+}
+
+```
+
+*obs*: sempre usar `elseif` para situações que precisam de mais de uma condição, ou seja fazer encadeamento das condições.
+
+##### Operadores ternários 
+Um atalho para a estrutura condicional `if/else`, normalmente escrito em uma única linha de código
+
+` condição ? verdadeira : falso `
+
+perfeito para decições curtas de uma linha de comando
+Exemplo: Verificar se Pessoa é maior de idade (18)
+
+```php
+
+$idade = 20;
+//O formato é : (Condição) ? Verdadeira : Falso;
+
+$status = ($idade >= 18) ? "Maior de Idade" : "menor de idade";
+
+```
+
+##### Expressão Condicional `match` (PHP 8)
+
+No mercado de PHP atual, não se usa mais ema dezena de `if/else`
+checar valores fixos, e o antigo `Seitch/case` caiu em desuso. Usamos o `match`. Ela compara um valor e retona diretamnete o resultado.
+
+```mermaid
+
+graph TD
+  A[valor] --> B{condicional}
+  B --> C[ação 1];
+  B --> D[ação 2];
+  B --> E[ação 3];
+  B --> F[ação 4];
+  B --> G[...];
+  B --> H[ação default];
+
+```  
