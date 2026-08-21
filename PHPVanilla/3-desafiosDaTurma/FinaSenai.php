@@ -2,6 +2,8 @@
 
 $categoriaCliente = 'B';//primeiro classifcação do cliente sendo ele tanto B como A quanto C e vamos utilizar estrutura match e definir as taxas de cada cliente
 
+$dividaAtual = 1000; //uma divida inicial
+
 $taxasJuros = match ($categoriaCliente) {
     'A' => 0.01,
     'B' => 0.02,
@@ -9,7 +11,6 @@ $taxasJuros = match ($categoriaCliente) {
     default => 0.05,
 }; 
 
-$dividaAtual = 1000; //uma divida inicial
 
 //depois apresentar por cliente sua categoria e sua taxa em porcentagem
 echo "Categoria do cliente:  " . $categoriaCliente ."<br>" .  PHP_EOL; 
@@ -29,7 +30,7 @@ for ($mes = 1; $mes <= 12; $mes++) {
     $dividaAtual = $dividaAtual + $jurosDoMes;
 
     //depois usar o echo para mostrar para o cliente o mes, os juros do mes o saldo 
-    echo "Mês $mes: Juros de R$" . number_format($jurosDoMes, 2,',', '.') . "saldo: " . number_format($dividaAtual, 2, ',', '.') . "<br>" . PHP_EOL;
+    echo "Mês $mes: Juros de R$" . number_format($jurosDoMes, 2,',', '.') . " saldo: " . number_format($dividaAtual, 2, ',', '.') . "<br>" . PHP_EOL;
 
     //usando o <br> para quebra de linha e mostrar de maneira correta e usar o PHP_EOL para as mensagens não grudarem numa na outras na hora de mostrar na web
 
