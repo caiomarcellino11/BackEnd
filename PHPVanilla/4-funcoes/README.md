@@ -11,7 +11,7 @@ uma função é como se fosse uma receita de bolo que mando para o computador e 
 vantagens:
 
  - deixa o código organizado 
- - não precisa reptir o código toda a vez
+ - não precisa reptir o código toda a vez - regra de ouro
 
  >lembra da função da matématica onde tem uma formula onde usa para te auxiliar
 
@@ -26,4 +26,131 @@ por isso a função facilita nessa questão não preciso ficar reptindo varias v
 
 ### Parâmetros e retorno
 
-são os valores que colocamos nas funções como queiro calcular  
+Pâpametros são valores que a função recebe para poder executar e trabalhar nela.
+Valor retornado é o resultaod que função devolve quando executa o código.
+
+```php
+function calcularTotal(float $preco, int $quantidade): float {
+    return $preco * $quantidade
+}
+```
+$preco -> parâmetros tipados do tipo float
+$quantidade -> parâmetros tipados do tipo int
+: float -> indica a função que deve retornar um float
+return $preco * $quantidade -> devolve o resultado da multiplicação.
+
+### Tipagem 
+Na declaração está:
+```php
+function cadastrar(string $nome, int $idade): bool
+```
+então temos:
+cadastar -> nome da função 
+string $nome -> parâmetros $nome, deve ser uma string.
+int $idade -> parâmetros $idade, que deve ser um inteiro
+bool -> tipo do valor retornara pela função
+
+### void e return 
+
+Uma função que retorna `string` deve devolver um texto usando `return`
+
+```php 
+function nomeCompleto(): string {
+    return "Caio Martins";
+}
+```
+---
+
+uma função `void` não retorna um valor.
+
+```php
+function mostrarMensagem(): void {
+    echo "Olá";
+}
+```
+---
+qual a diferença:
+
+`string` -> a função que devolce um texto
+`void` -> a função não devolve um valor
+
+
+### Escopo
+
+O código:
+
+```php
+$cliente = "Mariana";
+
+function exibirCliente(): string {
+    return $cliente;
+}
+```
+não funciona porque $cliente foi criada fora da função. variáveis criadads fora de uma função não ficam na hora disponíveis dentro dela.
+
+##### forma 1 - usando global
+
+```php
+
+$cliente = "Mariana";
+
+function exibirCliente(): string {
+    global $cliente;
+    return $cliente;
+}
+```
+---
+
+##### forma 2 - passando como parâmetros
+
+```php 
+
+$cliente = "Mariana";
+
+function exibirCliente(string: $cliente): string {
+    return $cliente;
+}
+
+echo exibirCliente($cliente);
+```
+> 2 forma e melhor pois deixam claras as informações na função precisa e evita depender de variáveis globais.
+
+### Referência
+
+quando usamos:
+
+```php
+float &$valor
+```
+o `&` faz com que a função receba uma referência à variável original, em vez de trabalhar apenas com uma cópia.
+
+por exemplo:
+
+```php
+function aumentar(float &$valor): void {
+    $valor += 10;
+}
+
+$preco = 50;
+aumentar($preco);
+
+echo $preco;
+```
+> resultado: 60
+
+Isso acontece porque a função alterou diretamente a variável $preco.
+Sem o &, a função trabalharia com uma cópia do valor e a variável original não seria alterada.
+
+### Funções nativas 
+
+Cinco exemplos de funções nativas do PHP:
+
+| Função | Categoria | O que faz | Como usar |
+|---|---|---|---|
+| `strlen()` | Strings | Conta a quantidade de caracteres de um texto. | `$tamanho = strlen($texto);` |
+| `strtoupper()` | Strings | Converte o texto para letras maiúsculas. | `$resultado = strtoupper($texto);` |
+| `strtolower()` | Strings | Converte o texto para letras minúsculas. | `$resultado = strtolower($texto);` |
+| `count()` | Arrays | Conta a quantidade de itens de um array. | `$total = count($produtos);` |
+| `sqrt()` | Números | Calcula a raiz quadrada de um número. | `$resultado = sqrt($numero);` |
+
+
