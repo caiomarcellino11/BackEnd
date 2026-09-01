@@ -154,3 +154,55 @@ Cinco exemplos de funções nativas do PHP:
 | `sqrt()` | Números | Calcula a raiz quadrada de um número. | `$resultado = sqrt($numero);` |
 
 
+```php
+
+strlen("Caio");       // 4
+strtoupper("caio");   // CAIO
+strtolower("CAIO");   // caio
+count([1, 2, 3]);     // 3
+sqrt(25);             // 5
+```
+
+---
+
+### Previsão de saída
+
+
+```php
+
+function aplicarDesconto(float $preco): float {
+    return $preco * 0.90;
+}
+
+$valor = 100.00;
+echo aplicarDesconto($valor);
+echo $valor;
+```
+no primeiro `echo` vai aparecer o resutado do calculo onde será 100*90 dando 90
+no segundo `echo` vai aparecer o valor original 100
+
+>como não existe `&` mo parâmetro não altera `$valor`
+continaundo 100
+---
+
+### Documentação
+
+Segundo a documentação oficial do PHP, a sintaxe é:
+
+```php
+strlen(string $string): int
+```
+Função: `strlen()`
+Parâmetro: `$string`, do tipo string.
+Retorno: int.
+Finalidade: retorna o número de bytes de uma string.
+>retorna a quantidade de letras de um nome ou número
+
+Exemplo:
+```php
+$nome = "Caio";
+
+echo strlen($nome);
+```
+Resultado:
+> 4
