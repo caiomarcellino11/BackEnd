@@ -9,7 +9,7 @@
    <h1>Olá Alunos! Vamos Aprender PHP???</h1>
    <?php
    echo "Olá, Mundo!!!";
-   // sera exibido um pará grafo com texto acima
+   // sera exibido um parágrafo com texto acima
    echo "<br> oi, serei exibido na tela";
    # outra forma de fazer comentário
    echo "<br>"
