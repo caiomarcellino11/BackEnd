@@ -840,4 +840,94 @@ exibi com mais detalhes as informações de um array ou variável em PHP
 echo var_dump($frutas);
 //Mostra Tudo: tipo de dados, o tamanho e o valor
 ```
+---
 
+### Semana 6 - processamento HHTP e formulários web
+
+#### Anatomia de um formulário HTML para BackEnd
+
+antes do PHP processar qualquer informação, precisamos coletar informações no frontEnd através de um `<from>` 
+
+** exemplo de `<form>` HTML 
+
+```html
+<form action="processa.php" method="POST">
+  <label>Nome completo </label>
+  <input type="text" id="campoNome" name="nomeUsuario"
+  placeholder="Digite seu nome">
+  <button type="submit">Cadastrar</button>
+</form>
+```
+
+**O 3 pilares do Formulário**
+1. action="processa.php" --> O Destino: Define qual script PHP no servidor receberá os dados.
+2. method="POST" --> O Transporte: Define a via de protocolo HTTP usada(GET ou POST).
+3. name="nomeUsuarios" --> A etiqueta do Dado: É o nome da chave que o PHP usará no array associativo ($POST["nomeUsuario"]).
+
+> obs: Nunca Confundir `id` com `name` no input, o PHP ignora o `id`
+
+#### O Protocolo HTTP
+
+Quando o Usuário clica no botão `type="submit"` , o navegador compila todas as infotmções dos campos preenchidos e dispara um pacote de comunicação padronizado pelo **Protocolo HTTP(Hypertext Tranfer Protocol)**
+
+- **O formato de Tranferência**
+
+- **Método GET**: Solicitar informações públicas e realizar buscas, mas altamente arriscada paa dados privados.
+
+- **método POST**: As informações viajam guardadas dentro do protocolo
+
+#### Testar o uso dos protocolos HTTP 
+
+```json
+{
+  "usuarios": [
+    {
+      "id": "1",
+      "nome": "Maria",
+      "idade": 25,
+      "ativo": true
+    },
+    {
+      "id": "2",
+      "nome": "José",
+      "idade": 27,
+      "ativo": true
+    },
+    {
+      "id": "3",
+      "nome": "João",
+      "idade": 22,
+      "ativo": false
+    },
+    {
+      "id": "4",
+      "nome": "Helena",
+      "idade": 28,
+      "ativo": false
+    },
+    {
+      "nome": "laura",
+      "idade": 31,
+      "ativo": true,
+      "id": "YD7HvFYOONc"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
+```
+>usando .json e thunder client para melhor didática 
+
+---
+
+#### GET vs.POST
+
+1. O Método GET (Consultas e filtros)
+
+O método `GET` é utilizado quando a intenção do cliente é **buscar ou filtrar dados** sem alterar o estado do servidor. Os dados enviados via `GET` são anexados diretamente ao final da URL na forma de uma **Query String**
+
+2. O Método POST (envio de cargas Úteis e Mutações)
+
+O método `POST` é utilizado o formulário envia dados que devem ser processados para **criar ou modificar registros** no sistema (ex: cadastro de usuáriosm, finalizações de comprar, upload de arquivos)
+
+
+#### Como os métodos funcionam no PHP (`$_GET`, `$_POST`, `$_SERVER`) - As SuperGlobais
