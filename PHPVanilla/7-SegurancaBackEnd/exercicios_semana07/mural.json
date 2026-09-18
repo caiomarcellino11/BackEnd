@@ -1,0 +1,14 @@
+[
+    {
+        "nome": "caio",
+        "mensagem": "<script>alert('Cookie capturado: ' + document.cookie);<\/script>"
+    },
+    {
+        "nome": "<script>alert('Cookie capturado: ' + document.cookie);<\/script>",
+        "mensagem": "<script>alert('Cookie capturado: ' + document.cookie);<\/script>"
+    },
+    {
+        "nome": "caio",
+        "mensagem": "tudo bem?"
+    }
+]

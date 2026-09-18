@@ -1006,3 +1006,165 @@ A técnica do **Sticky form** consiste em imprimir de volta o valor no atributo 
 </div>
 ```
 
+
+---
+
+
+
+### Semana 7 - Segurança no BackEnd - Sanitização, Validação e Proteção contra XSS
+
+**1º Mandamento do Desenvolvedor BackEnd**
+
+> Nunca Confie no Usuário: Toda entrada de dados vinda de fora do servidor é potencialmente maliciosa até que seja rigorosamente validade, sanitizada e codificada.
+
+Quando você disponibiliza um campo de texto em um site, qualquer pessoa conectad a internet pode digitar código maliciosos em vez de texto. Se o código BackEnd pega esse texto diretamente sem nenhum tratamento, a ordem de execução de código abrirá portas para a invasão devastadora do sistema.
+
+
+**A Anatomia de um ataque: O que é Cross-site Scripting (XSS)**
+
+
+O XSS ocorre quando uma aplicação web inclui dados não confiáveis em uma página web sem a devida validação ou escape de caracteres. Isso, permite que um atacante execute scripts maliciosos (geralmente em JavaScript) diretamente no navegadopr de outro usuário que visitam o site.
+
+**As principais modalidades de Ataque**
+
+1. *roubo de Sessão(cookies stealing)*: O JavaScript injetado lê os cookies de autenticação da vítima (document.cookie) e os envia para o servidor do atacante, permitindo que ele faça login na conta da vítima sem precisar da senha.
+
+2. *Desconfigurção do Site(defacement)*: Alteração visual do site, inseridno mensagens falsas, banners ofensivos ou formulários de login fraudulentos(phising interno).
+
+3. *Redirecionamento Malicioso*: Força o navegador da vítima a abrir sites com vírus ou páginas clonadas de banco.
+
+4.*Captura de Teclas(keylogger)*: Grava tudo que a vítima enquanto a página estiver aberta.
+
+**Os Vetores de Ataques Mais Frequentes**:
+
+Nem todo ataque XSS usa a tag óbvia `<script>`. Desenvolvedores que tentam bloquear XSS apenas "apagando a palavra script" são facilmente burlados por atacantes:
+
+| Vetor de Injeção | Como funciona o ataque? |
+| :--- | :--- |
+| `<script>alert('XSS')</script>` | Injeção direta de bloco de script executável pelo navegador. |
+| `<img src="invalido.jpg" onerror="alert('XSS')">` | O navegador tenta carregar a imagem inexistente e dispara o evento `onerror` com o JavaScript. |
+| `<svg onload="alert('XSS')">` | O navegador renderiza o elemento gráfico SVG e executa o evento `onload`. |
+| `<a href="javascript:alert('XSS')">Clique</a>` | O clique no link executa a pseudo-URL com JavaScript em vez de abrir um site. |
+| `"><script>alert('XSS')</script>` | Usado quando o dado é impresso dentro de um `<input value="...">`, quebrando o atributo e injetando a tag. |
+
+#### **A Tríade de Defesa: Validação, Sanitização e Escapamento**
+
+1. **Validação**: Verifica se o dado recebido atende aos requisitos exatos do sistema(tipo, tamanho, formato).
+
+ex: Verificar se o e-mail possui `@` e dominio válido (`filter_var$email, FILTER_VALIDADE_EMAIL`).
+
+2. **Sanitização**: Transforme o dado para adequa-lo ao formato desejado, removendo caracteres indesejados.
+
+Ex: Remover no ínicio e fim(`trim($nome)`).
+
+3. **Escapamento/Codificação de saída**: é o ato de converter caracteres especiais de linguagem HTML em suas respectivas **Entidades HTML** no momento exato em que eles são impressos na tela.
+
+ex: usar `htmlspecialchars()`.
+
+```mermaid
+
+flowchart LR
+
+  A[Entarda de dados GET/POST]
+  B{1. Validação}
+  C[2. Sanitização]
+  D[processamento]
+  E[3.Escapamento]
+  F[HTML/UI]
+
+  A --> B
+  B --(Inválida)--> A
+  B --(Válida) --> C
+  C --(Limpa e Formata) --> D
+  D --> E
+  E -- Converter Caracteres HTML --> F
+
+```
+
+---
+
+#### **A ferramenta princípal: `htmlspecialchars()`**
+
+É o princípal mecanismo do PHP para neutralizar XSS na camada de Apresentação(UI)
+
+**Como a conversão de entidades HTML funciona?**
+
+| Caractere Original | Entidade HTML Gerada | Efeito no Navegador |
+| :---: | :---: | :--- |
+| `<` | `&lt;` (*Less Than*) | O navegador exibe `<` na tela, mas **não cria uma tag**. |
+| `>` | `&gt;` (*Greater Than*) | O navegador exibe `>` na tela sem fechar tags. |
+| `"` | `&quot;` (*Quotation Mark*) | Não quebra atributos HTML `<input value="...">`. |
+| `'` | `&#039;` ou `&apos;` | Protege strings envoltas em aspas simples. |
+| `&` | `&amp;` (*Ampersand*) | Evita interpretação incorreta de entidades. |
+
+**A sintaxe no PHP**
+
+```php
+string htmlspecialchars(
+  string $string,
+  int $falgs = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5,
+  ?string $encoding = "UTF-8
+)
+```
+- `ENT_QUOTES`: Converte tanto aspas duplas quanto aspas simples
+- `ENT_SUBSTITUTE`: Substitui sequências de bytes inválidos por caractres de substituição unicode em vez de retornar uma string vazia
+- `ENT_HTML5`: aplica a tabela de entidade compatíveis com a especificação HTML5
+- `UTF-8`: Garante que caracteres de lingua portuguesa com "ç", "ã",
+"é" sejam preservados em corrupção.
+
+
+**A função helper de Escapamento**
+
+para não digitar essa linha extensa em todas as partes de saída de texto para HTML, os desenvolvedores profissionais criam uma função auxuliar curta:
+
+```php
+function e(string $texto):string{
+  return htmlspecialchars($texto, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8");
+}
+
+<p>Comentário: <?= e($comentarioUsuario) ?></p>
+<input type= "text" name= "nome" value="<?= e($nomeUsuario) ?>" />
+
+```
+
+#### **Validação e Sanitização com `filter_var()`**
+
+O PHP possui a biblioteca de filtros nativos `filter_var()`.
+
+
+```php
+<?php
+declare(strict_types=1);
+
+// 1. Validação de E-mail
+$email = "usuario.teste@senai.br";
+if (filter_var($email, FILTER_VALIDATE_EMAIL) !== false) {
+    // E-mail válido
+}
+
+// 2. Validação de Número Inteiro com Limites (Range)
+$idade = "25";
+$opcoesIdade = [
+    'options' => [
+        'min_range' => 16,
+        'max_range' => 120
+    ]
+];
+if (filter_var($idade, FILTER_VALIDATE_INT, $opcoesIdade) !== false) {
+    // Idade é um inteiro entre 16 e 120
+}
+
+// 3. Validação de URLs (Links)
+$website = "https://www.sp.senai.br";
+if (filter_var($website, FILTER_VALIDATE_URL) !== false) {
+    // URL possui protocolo e formato válidos
+}
+
+// 4. Validação de Endereço IP
+$ip = "192.168.1.100";
+if (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+    // IP válido
+}
+
+```
+
