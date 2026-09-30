@@ -1,0 +1,6 @@
+# Arquivos que serão ignorados na hora de fazer versionamento
+# esses arquivos serão armazenados apenas no computador de forma local
+
+config/database.ini
+
+logs/
