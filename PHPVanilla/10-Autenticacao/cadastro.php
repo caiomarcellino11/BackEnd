@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 require_once __DIR__ . '/SAAutenticacao/src/ConexaoBanco.php';
 require_once __DIR__ . '/SAAutenticacao/src/UsuarioDAO.php';
 require_once __DIR__ . '/SAAutenticacao/src/AuthService.php';
@@ -9,45 +10,53 @@ const CONFIG_PATH = __DIR__ . '/SAAutenticacao/config/database.ini';
 
 AuthService::iniciarSessaoSegura();
 
-// Se ja estiver logado, redireciona para a dashboard
+// Se o usuario ja estiver logado, redireciona para a dashboard
 if (isset($_SESSION['usuario_id'])) {
     header('Location: dashboard.php');
     exit;
 }
 
 $erro = '';
-$sucesso = '';
-$mensagens = [
-    'restrito' => 'Efetue o login para acessar a área restrita do sistema.',
-    'expirado' => 'Sua sessão expirou por inatividade. Faça login novamente.',
-    'logout'   => 'Sessão encerrada com segurança.'
-];
 
-if (isset($_GET['erro']) && isset($mensagens[$_GET['erro']])) {
-    $erro = $mensagens[$_GET['erro']];
-}
-
-if (isset($_GET['sucesso']) && $_GET['sucesso'] === 'cadastrado') {
-    $sucesso = 'Usuário cadastrado com sucesso! Efetue seu login para continuar.';
+/**
+ * Valida as entradas fornecidas no formulario de cadastro.
+ */
+function validarFormulario(string $nome, string $email, string $senha, string $confirmar): ?string {
+    if (empty($nome) || empty($email) || empty($senha) || empty($confirmar)) {
+        return 'Todos os campos sao de preenchimento obrigatorio.';
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return 'Informe um endereco de e-mail corporativo valido.';
+    }
+    if (strlen($senha) < 8) {
+        return 'A senha deve possuir no minimo 8 caracteres.';
+    }
+    if ($senha !== $confirmar) {
+        return 'As senhas informadas nao coincidem.';
+    }
+    return null;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $senha = (string)($_POST['senha'] ?? '');
+    $nome      = trim($_POST['nome'] ?? '');
+    $email     = trim($_POST['email'] ?? '');
+    $senha     = (string)($_POST['senha'] ?? '');
+    $confirmar = (string)($_POST['confirmar_senha'] ?? '');
 
-    if (empty($email) || empty($senha)) {
-        $erro = 'Preencha o e-mail e a senha corporativa.';
-    } else {
+    $erro = validarFormulario($nome, $email, $senha, $confirmar);
+
+    if ($erro === null) {
         $pdo = ConexaoBanco::obterConexao(CONFIG_PATH);
         $usuarioDAO = new UsuarioDAO($pdo);
-        $usuario = $usuarioDAO->buscarPorEmail($email);
 
-        if ($usuario && password_verify($senha, $usuario['senha_hash'])) {
-            AuthService::autenticar($usuario);
-            header('Location: dashboard.php');
+        if ($usuarioDAO->emailExiste($email)) {
+            $erro = 'Este e-mail ja se encontra registrado no sistema.';
+        } elseif ($usuarioDAO->cadastrar($nome, $email, $senha, 'OPERADOR')) {
+            header('Location: login.php?sucesso=cadastrado');
             exit;
+        } else {
+            $erro = 'Falha ao registrar o usuario. Tente novamente mais tarde.';
         }
-        $erro = 'Credenciais incorretas ou usuário desativado.';
     }
 }
 ?>
@@ -56,10 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Corporativo — SENAI TechPortal</title>
+    <title>Cadastro de Usuário — SENAI TechPortal</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: #f8fafc; }
-        .card-login { background: #1e293b; padding: 35px; border-radius: 10px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 1px solid #334155; }
+        .card-cadastro { background: #1e293b; padding: 35px; border-radius: 10px; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 1px solid #334155; }
         h1 { color: #38bdf8; font-size: 1.5rem; text-align: center; margin-top: 0; }
         p.subtitulo { text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 25px; }
         .form-group { margin-bottom: 16px; }
@@ -69,44 +78,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         button { width: 100%; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 0.95rem; }
         button:hover { background: #0369a1; }
         .alerta-erro { background: #7f1d1d; border: 1px solid #dc2626; color: #fecaca; padding: 10px; border-radius: 5px; font-size: 0.85rem; margin-bottom: 18px; text-align: center; }
-        .alerta-sucesso { background: #14532d; border: 1px solid #16a34a; color: #bbf7d0; padding: 10px; border-radius: 5px; font-size: 0.85rem; margin-bottom: 18px; text-align: center; }
         .rodape-link { margin-top: 20px; text-align: center; font-size: 0.85rem; color: #94a3b8; }
         .rodape-link a { color: #38bdf8; text-decoration: none; font-weight: bold; }
         .rodape-link a:hover { text-decoration: underline; }
-        .demo-box { background: #0f172a; padding: 10px; border-radius: 4px; font-size: 0.75rem; color: #94a3b8; margin-top: 20px; text-align: center; border: 1px dashed #475569; }
     </style>
 </head>
 <body>
-<div class="card-login">
-    <h1>🛡️ SENAI TechPortal</h1>
-    <p class="subtitulo">Acesso seguro com Sessões e Hashing Argon2id</p>
-
-    <?php if (!empty($sucesso)): ?>
-        <div class="alerta-sucesso"><?= htmlspecialchars($sucesso, ENT_QUOTES, 'UTF-8') ?></div>
-    <?php endif; ?>
+<div class="card-cadastro">
+    <h1>📝 Novo Cadastro</h1>
+    <p class="subtitulo">Crie seu acesso para utilizar o portal corporativo</p>
 
     <?php if (!empty($erro)): ?>
         <div class="alerta-erro"><?= htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') ?></div>
     <?php endif; ?>
 
-    <form action="login.php" method="POST">
+    <form action="cadastro.php" method="POST">
+        <div class="form-group">
+            <label for="nome">Nome Completo</label>
+            <input type="text" id="nome" name="nome" required placeholder="Ex.: Maria Souza" value="<?= htmlspecialchars($_POST['nome'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+        </div>
         <div class="form-group">
             <label for="email">E-mail Corporativo</label>
-            <input type="email" id="email" name="email" required placeholder="admin@senai.br">
+            <input type="email" id="email" name="email" required placeholder="usuario@senai.br" value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
         </div>
         <div class="form-group">
-            <label for="senha">Senha de Acesso</label>
+            <label for="senha">Senha (mínimo 8 caracteres)</label>
             <input type="password" id="senha" name="senha" required placeholder="••••••••">
         </div>
-        <button type="submit">Autenticar no Sistema</button>
+        <div class="form-group">
+            <label for="confirmar_senha">Confirmar Senha</label>
+            <input type="password" id="confirmar_senha" name="confirmar_senha" required placeholder="••••••••">
+        </div>
+        <button type="submit">Cadastrar e Criar Conta</button>
     </form>
 
     <div class="rodape-link">
-        Ainda não tem conta? <a href="cadastro.php">Cadastre-se aqui</a>
-    </div>
-
-    <div class="demo-box">
-        Credencial de teste: <strong>admin@senai.br</strong> | Senha: <strong>Senai@2026</strong>
+        Já possui conta ativa? <a href="login.php">Fazer login</a>
     </div>
 </div>
 </body>

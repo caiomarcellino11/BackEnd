@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Conexao Singleton com o PostgreSQL via PDO.
+ * Gerenciador de conexao unica com o PostgreSQL via PDO (Singleton).
  */
 final class ConexaoBanco {
     private static ?PDO $instancia = null;
@@ -11,27 +11,48 @@ final class ConexaoBanco {
     private function __clone(): void {}
 
     public function __wakeup(): void {
-        throw new \Exception("Desserializacao proibida.");
+        throw new \Exception("Desserializacao nao permitida.");
     }
 
+    /**
+     * Retorna a conexao ativa existente ou instancia uma nova sob demanda.
+     */
     public static function obterConexao(string $caminhoConfig): PDO {
         if (self::$instancia === null) {
-            if(!file_exists($caminhoConfig)){
-                throw new \RuntimeException("Arquivo de configuração não encontrado em {$caminhoConfig}");
-            }
-            $dados = parse_ini_file($caminhoConfig, true);
-            if($dados === false || !isset($caminhoConfig, true)){
-                throw new \RuntimeException("sessão [database] ausente no arquivo de configuracao");
-            }
-            $cfg = $dados['database'];
-            $dsn = sprintf("%s:host=%s;port=%s;dbname=%s",
-                $cfg['db_driver'], $cfg['db_host'], $cfg['db_port'], $cfg['db_name']);
-            self::$instancia = new PDO($dsn, $cfg['db_user'], $cfg['db_pass'], [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false
-            ]);
+            $config = self::carregarConfig($caminhoConfig);
+            self::$instancia = self::criarConexao($config);
         }
         return self::$instancia;
+    }
+
+    /**
+     * Le o arquivo INI com as credenciais do PostgreSQL.
+     */
+    private static function carregarConfig(string $caminho): array {
+        if (!file_exists($caminho)) {
+            throw new \RuntimeException("Arquivo de configuracao ausente.");
+        }
+        $dados = parse_ini_file($caminho, true);
+        if ($dados === false || !isset($dados['database'])) {
+            throw new \RuntimeException("Secao [database] invalida no arquivo INI.");
+        }
+        return $dados['database'];
+    }
+
+    /**
+     * Instancia o objeto PDO com as flags de seguranca recomendadas.
+     */
+    private static function criarConexao(array $cfg): PDO {
+        $dsn = sprintf("%s:host=%s;port=%s;dbname=%s",
+            $cfg['db_driver'], $cfg['db_host'], $cfg['db_port'], $cfg['db_name']);
+
+        $opcoes = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+            PDO::ATTR_TIMEOUT            => 5
+        ];
+
+        return new PDO($dsn, $cfg['db_user'], $cfg['db_pass'], $opcoes);
     }
 }
