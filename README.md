@@ -1682,3 +1682,296 @@ Em todas as páginas restritas do sistema a **primira linha de código** após o
 require_onde __DIR__ . "/src/guard.php";
 ```
 Se a pessoa não estiver autenticada ou não tiver o perfil de acesso, ela é expulsa antes mesmo que qualquer bytes de HTML seja renderizado
+
+---
+
+### Semana 11 - Programação Orientada a Objetos Em PHP
+
+**Tema:** Paradigma de POO, Os 4 pilares da Orientação a Objetos(Abstração, Encapsulamento, Herança e Polimorfismo), Classes e Instância, Construtores, Modificadores de Acesso (Private, Protected, Public) e Modelagem de Dados.
+
+#### **Do Procedural à Orientação a Objetos**
+
+Manipilação de variáveis, laços de repetição e funções de forma linear, ou seja, todo o código é escrito em um monobloco(`código em um único arquivo de programação`). Essa abordagem resolve problemas lineares com maestria, mas colapsa rapidamente quando sistemas crescem em escala, complexidade e criticidade de regras de negócio.
+
+Na programação procedual:
+
+1. **Os dados estão expostos:** qualquer função pode alterar qualquer campo a qualquer momento
+2. **As regras de validação ficam dispersos:** Cada tela precisa checar uma função, gerando dezenas de `if/else` duplicados espalhados pelo código. Se uma regra mudar, o desenvolver precisa lembrar de atualizar todos os arquivos do sistema.
+3. **Não há garantias de invariantes:** É impossível garantir que um dado sempre permaneça em estado consistente.
+
+**O que é paradigma Orientada a Objetos (POO)?**
+
+Na **POO**, em vez de separar funções de um lado e dados soltos do outro, nós unimos *dados(atributos)* e as *funções que manipulam esses dados(métodos)* dentro de uma única estrutura chamada **Objeto**.
+
+| Aspecto | Paradigma Procedural | Paradigma Orientado a Objetos (POO) |
+| :--- | :--- | :--- |
+| **Unidade Fundamental** | Procedimentos e Funções soltas | Classes e Objetos |
+| **Proteção de Dados** | Nenhuma (dados globais ou em arrays abertos) | Alta (Encapsulamento com atributos privados) |
+| **Reuso de Código** | Inclusão de scripts (`require_once`) e cópia | Herança (`extends`), Composição e Interfaces |
+| **Tratamento de Variações** | Blocos gigantes de `switch` e `if/else` | Polimorfismo e Classes Abstratas |
+| **Manutenibilidade** | Complexa à medida que a base de código cresce | Alta, modular, testável e pronta para arquiteturas corporativas (MVC, DDD, Clean Architecture) |
+
+
+#### **Anatomia de uma classe**
+
+- **classe**: é molde, a planta baixa, o projeto de engenharia. ela descreve quais atributos(dados) e comportamentos(métodos) as entidades daquelas tipo possuirão.
+ela reside no código-fonte e não ocupa espaço dinâmico de dados na memória.
+- **Objetos**: é o produto final construido a partir do molde, uma instância real, palpável e viva alocada na memória do servidor durante o ciclo de execução.
+
+
+
+```mermaid
+flowchart TD
+    molde["Classe: ContaBancaria<br/>(Molde / Definição de Atributos e Métodos)"]
+
+    molde -->|"new ContaBancaria()"| obj1["Objeto 1 em Memória<br/>Titular: Carlos<br/>Agência: 001<br/>Saldo: R$1.500,00"]
+    molde -->|"new ContaBancaria()"| obj2["Objeto 2 em Memória<br/>Titular: Douglas<br/>Agência: 001<br/>Saldo: R$4.200,00"]
+    molde -->|"new ContaBancaria()"| obj3["Objeto 3 em Memória<br/>Titular: Eduardo<br/>Agência: 003<br/>Saldo: R$850,00"]
+
+    style molde fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#312e81
+    style obj1 fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#14532d
+    style obj2 fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#14532d
+    style obj3 fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#14532d
+```
+
+**O ciclo de Instanciamento de Objetos**
+
+Ao instanciar um objeto com a instrução `new`, o PHP incoca o método construtor especial `__constructor()`. E usamos a palavra-chave `$this` para fazer referência direta e exclusivamente ao **atributo que está sendo executado pelo código naquele momento**.
+
+```php
+
+class contaBancaria{
+  //declaração tradicional de atributos tipados
+  private string $titular;
+  private int $agencia;
+  private float $saldo;
+
+  //Método construtor
+  public function __constructor(string $titular, int $agencia, float $saldo){
+    $this->titular = titular; //$this-> titular refere-se ao atributos da classe
+    $this->agencia = agencia;//$this->agencia refere-se ao atributos da classe
+    $this->saldo = saldo;//$this->saldo refere-se ao atributo da classe
+  }
+
+  // método de acesso
+  public function getSaldo(): float{
+    return $this->$saldo;
+  }
+}
+
+//instanciando dois objetos completamente independentes
+$conta1 = new contaBancaria("Carlos", 001, 100.00);
+$conta2 = new contaBancaria("Douglas", 003, 500.00);
+
+echo $conta1->getSaldo();//Exibe 100.00
+echo $conta2->getSaldo();//Exibe 500.00
+```
+
+> [!OBS:]
+> **Alocação de Objetos na Memória**
+> No PHP, variáveis que armazenam objetos, usam um **identificador/referêncai para o endereço na memória**. quando você passa um objeto para uma função ou método, está passando a referência na memória. o que torna p POO extremamente performátivo.
+
+#### **Os 4 pilares da Orintação a objetos**
+
+``` mermaid
+quadrantChart
+  title Os 4 pilares da Programação Orientada a Objetos
+  x-axis "Conceituação & Estruturação" --> "Comportamentos & Dinâmica"
+  y-axis "Nível Individual" --> "Nível Hierárquico"
+
+  "1. Abstração":[0.25,0.25]
+  "2. Encapsulamento": [0.25, 0.75]
+  "3. Herança": [0.75, 0.75]
+  "4. Polimosrfismo": [0.75, 0.25]
+```
+1. **Pilar 1: Abstração**
+**Definição:** Capacidade de filtrar etalhes irrelevantes e focar estritamente nas caracteristicas e comportamentos essenciais da entidade para o contexto do software que está
+sendo construido.
+*Exemplo*: Para um sistema bancário, o que importa em um cliente é seu nome, CPF e renda. Sua cor favorita ou altura são abstrações e podem ser descartadas
+
+2. **Pilar 2: Encapsulamento**
+**Definição:** Blindagem dos estado interno do objeto. Os atributos devem ser protegisdo contra acesso ou modificações diretamente do mundo exterior. Alterações no estado só ocorrem através de métodos públicos que validam regras de negócio e mantêm invariantes contábeis.
+
+3. **Pilar 3: Herança**
+**Definição**: Mecanismo pelo qual uma classe filha (subclasse) herda atributos e comportamentos de uma classe ancestral (superclasse), promovendo o reuso de códigos e estabelecendo uma relação do tipo **É UM**
+*Exemplo:* um Cachorro(subclasse) é um Mamífero(superclasse) 
+-> porque ele herda características da classe dos Mamíferos
+
+4. **Pilar 4: Polimosrfismo**
+**Definição:** Princícipo que permite  que classes filhas diferentes respondam a mesma chamada de método com implementações especializadas e comportamentos distintos. O Chamador não precisa saber qual subclasse exata está executando, apena confia que o método cumprirpa o contrato. 
+
+#### **Encapsulamento Rigoroso**
+
+Os Modificadores de visibilidade:
+
+| Modificador | Onde pode ser acessado? | Recomendação de Uso |
+| :--- | :--- | :--- |
+| **`private`** | **Apenas** dentro da própria classe que o declarou. Subclasses e scripts externos não conseguem ler nem alterar. | **Padrão ouro para atributos.** Garante proteção absoluta de estado e impede efeitos colaterais. |
+| **`protected`** | Dentro da própria classe e por quaisquer **subclasses que a herdem (`extends`)**. O mundo exterior continua bloqueado. | Usado quando subclasses precisam ler ou ajustar diretamente um valor compartilhado (ex.: `$saldo` em classes filhas de conta). |
+| **`public`** | Acessível livremente por **qualquer parte do sistema**, dentro ou fora da classe. | Usado para os métodos que compõem a **interface pública** do objeto (ações como `sacar()`, `depositar()`, `transferir()`). |
+
+```mermaid
+flowchart TD
+    subgraph ClassePai ["Classe: ContaBancaria"]
+        priv["private: string $segredo<br/>(Apenas ContaBancaria enxerga)"]
+        prot["protected: float $saldo<br/>(ContaBancaria e filhas enxergam)"]
+        pub["public: function depositar()<br/>(Todo o sistema enxerga)"]
+    end
+
+    subgraph ClasseFilha ["Classe: ContaCorrente (extends ContaBancaria)"]
+        filhaMetodo["function sacar()<br/>• Acessa $saldo (protected) ✔<br/>• NÃO acessa $segredo ❌"]
+    end
+
+    subgraph ScriptExterno ["Arquivo de Rota / Controller Externo"]
+        ext["$conta->depositar(100) ✔<br/>$conta->saldo = 500 ❌ (Fatal Error!)"]
+    end
+
+    ClassePai -->|"Herança"| ClasseFilha
+    ScriptExterno -->|"Interação Pública"| pub
+
+    style priv fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    style prot fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+    style pub fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+```
+
+**Usando  Getter and Setters**
+
+Ao declarar Atributos privados se você deseja manipular esses atributos privados é importante criar os modificadores de Acesso através dos *getters and setters*
+
+ao criar um atributos `float $saldo`
+
+para modificar os valores do saldo ou ler o saldo é importante criar os métodos públicos
+
+`public function getSaldo()`: permite consultar o valor do saldo 
+
+`public function setSaldo()`: permitir modificar o valor de saldo
+
+>[!Cuidado]
+> **Não destrua seu encapsulamento** : para atributos que não serão modificados como CPF por exemplo não há necessidade de criar um `setCPF` o CPF de uma pessoa não será modificado ao longo da vida.
+
+**Construtor Property Promotion (declaração no Construtor)**
+
+No PHP 8.X Podemos utilizar recursos modernos que reduzem o código repetitido e elevam a segurança. o uso do `Property Promotion` no construtor é um exemplo, não precisamos declarar os atributos e depois fazer o construtor, basta declarar os atributos diretamente dentro do construtor
+
+```php 
+class TitularProperty {
+    public function __construct(
+        private string $nome,
+        private string $cpf
+    ){}
+} 
+// é igual que
+
+class TitularSemproperty {
+  private string $nome;
+  private string $cpf;
+
+  public function __construct(string $nome, string $cpf){
+    $this->nome = $nome;
+    $this->cpf = $cpf;
+  }
+}
+```
+#### **Herança, Classes Abstratas e Polimorfismo**
+
+**Classes Abstratas**: Uma Classe abstrata é uma superclasse conceitual que **Não pode ser instanciada diretamente com `new`**. Ela serve como matriz para que subclasse concretas seja derivados.
+```php
+abstract class ContaBancaria {
+    //classe filhas herdam esta propriedade protegida
+    protected float $saldo;
+
+    public function __construct(float $saldoInicial =0.0){
+        $this->saldo = $saldoInicial;
+    }
+
+    public function getSaldo(): float {
+        return $this->saldo;
+    }
+
+    //método abstrato: Obriga a subclasse a fornecer sua própria implementação
+    abstract public function sacar(float $valor): void;
+}
+//se um objeto da classe ContaBancaria tentar ser instanciado vai gerar um erro na compilação
+$conta = new ContaBancaria(); //erro: Cannot instantiate
+```
+
+**Herança:** é um mecanismo que permite que uma classe(subclasse) herde atributos e métodos de outra classe (superclasse)
+
+```php
+class ContaCorrente extends ContaBancaria {
+  public function sacar(float $valor): void{
+    //Implementa especificamente para Conta Corrente
+      $this->saldo -= $valor + 2.50; //Taxa de Saque
+  }
+}
+
+class ContaPoupanca extends ContaBancaria {
+  public function sacar(float $valor): void {
+    $this->saldo -= $valor; //não tem taxa de saque
+  }
+}
+
+$contaCorrente = new ContaCorrente(1000.00);
+$contaCorrente = new ContaPoupanca(500.00);
+
+$contaCorrente->sacar(100.00); //Deduz R$ 102,50 do saldo
+$contaPoupanca->sacar(100.00); //Deduz R$100,00 do saldo
+
+$contaCorrente->getSaldo(); // Retorna 897,50
+$contaPoupanca->getSaldo(); // Retorna 400,00
+```
+>observer que ambas as classes implementam o método `sacar()`de maneira doferente, respeitando as regras de negócio espefícicas de cada tipo de conta.
+
+**Polimorfismo:** O método `sacar()` na classe ContaBancaria
+demostra o polimorfismo em ação
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Cliente as Script / Controller
+    participant CC as Conta Origem (ContaCorrente)
+    participant CP as Conta Destino (ContaPoupanca)
+
+    Cliente->>CC: transferir(200.00, $CP)
+    Note over CC: CC executa seu próprio método sacar():<br/>Valida saldo + limite e cobra taxa de R$ 2,50!
+    CC->>CC: sacar(200.00) (Deduz R$ 202,50 do saldo)
+    CC->>CP: depositar(200.00)
+    Note over CP: CP credita R$ 200,00 no seu saldo
+    CC-->>Cliente: Transferência concluída atomicamente!
+```
+
+#### **Exceções de Domínio: Tratamento de Erros do sistema**
+
+Um dos maiores erros cometidos em sistema procedurais é o retorno mágico de valores como `-1`, `false` ou `null` quando uma regra de negócio é violada.
+
+**Para Corrigir esse erros Mágicos devemos usar `throw Exception`
+se o método retorna `false` quando ocorrer um erros o desenvolvedor não fez o tratamento de erros corretamente.
+exemplo. Se o `sacar()` retornar `false` quando não houver saldo, o sistema continuará executando como se o dinheiro tivesse saído causando furos de caixa no sistema. já quando usamos uma **Exceção de Comínio**, a execução é interrompida e feito um tratamento usando um bloco `try/catch`.
+
+```mermaid
+flowchart TD
+    op["Operação: $conta->sacar(5000.00)"] --> check{"Saldo suficiente?"}
+    check -- Sim --> ok["Deduz saldo e prossegue normalmente"]
+    check -- Não --> erro["throw new SaldoInsuficienteException(...)"]
+    
+    erro --> intercept["Interrompe execução imediata!"]
+    intercept --> catchBlock["try { ... } catch (SaldoInsuficienteException $e) {<br/>    // Captura segura e mensagem amigável para o usuário<br/>}"]
+
+    style ok fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    style erro fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    style catchBlock fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#312e81
+```
+
+> [!OBS]
+>`try/catch` é o mecanismo de captura de exceções do PHP. ele permite que você trate erros de forma inteligente, mantendo a integridade do sistema e fornecendo feedback claro ao usuário.
+
+
+
+
+
+
+
+
+
+
+
