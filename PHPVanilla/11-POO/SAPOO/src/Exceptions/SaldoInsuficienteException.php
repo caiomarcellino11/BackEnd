@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 //subclasse de ContaException
 final class SaldoInsuficienteException extends ContaException{
-    #[Override]
     public function __construct(float $saldoDisponivel, float $valorTentado)
     {
         $message = sprintf(
