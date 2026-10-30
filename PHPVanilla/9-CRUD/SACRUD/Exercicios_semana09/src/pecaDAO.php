@@ -1,101 +1,194 @@
 <?php
+
 declare(strict_types=1);
 
-//Camada de ACesso a Dados (DAO) para almoxarifado de peças
-// esta Camada sera um Classe de Conexão usando POO (Programaçãk orientada ao Objeto)
+// Camada de Acesso a Dados (DAO) para o almoxarifado de peças industriais.
+// Toda regra de persistência fica isolada nesta classe.
 
-final class PecaDAO {
-    //atributos da classe
-    private PDO $pdo; // => atributo que irá disponibiliar a conexão com o banco de dados
+final class PecaDAO
+{
+    // Atributo que guarda a conexão com o banco de dados
+    private PDO $pdo;
 
-    //métodos da classe
-    //construtor -> é o método que permite criar objetos desta classe
-    public function __construct(PDO $pdo) {
-        //ao chamar o construtor estou atribuindo um valor  ao atributo declarado anteriormente
+    // Construtor: exige uma conexão já criada (ex.: pela classe ConexaoBanco)
+    public function __construct(PDO $pdo)
+    {
         $this->pdo = $pdo;
     }
-    // para criar um obj da clase PecaDAO é necessário ja possuir uma conexão estabelecida com o banco de dados, conexão essa criada anteriormente na classe ConexaoBanco
 
-    //criar os método do CRUD
-    //READ -> listar todas as peças em ordem decrescente
-    public function listarTodos(): array {
-        $sql = "SELECT * FROM pecas_industriais ORDER BY id DESC";
-        $stmt = $this->pdo->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);//criar uma lista de produtos associando os valores ao nomes das colunas do banco de dados
+    // ---------- READ ----------
+
+    // Lista somente as peças ativas (Ex. 5: exclusão lógica)
+    public function listarTodos(): array
+    {
+        $sql = "SELECT * FROM pecas_industriais WHERE ativo = TRUE ORDER BY id DESC";
+
+        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
-    //READ -> Listar objetos pelo ID
-    public function buscarPorId(int $id): array{
-        $sql = "SELECT * FROM pecas_industriais WHERE id= :id"; //código sql
-        //se vai ter dados sendo inseridos pelo usuário
-        $stmt = $this->pdo->prepare($sql);
-        //prepara o parametro de entrada usando bindValue()
+
+    // Lista as peças "excluídas" (continuam no banco para auditoria contábil)
+    public function listarInativas(): array
+    {
+        $sql = "SELECT * FROM pecas_industriais WHERE ativo = FALSE ORDER BY id DESC";
+
+        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Busca uma peça pelo ID; devolve null se não existir
+    public function buscarPorId(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM pecas_industriais WHERE id = :id");
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
         $stmt->execute();
-
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $resultado;
+
+        return $resultado === false ? null : $resultado;
     }
 
-    //READ -> buscar por termo (filtro)
+    // Busca por termo (SKU, descrição ou categoria) com marcadores distintos
     public function buscarPorTermo(string $termo): array
     {
         $sql = "SELECT * FROM pecas_industriais
-                 WHERE codigo_sku ILIKE :termo 
-                 OR descricao ILIKE :termo
-                 OR categoria ILIKE :termo
+                WHERE ativo = TRUE
+                  AND (codigo_sku ILIKE :termo_sku
+                   OR descricao ILIKE :termo_desc
+                   OR categoria ILIKE :termo_cat)
                 ORDER BY descricao ASC";
+        $like = "%" . trim($termo) . "%";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([":termo" => "%" .trim($termo) . "%"]);
-        $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $resultado;  
+        $stmt->execute([":termo_sku" => $like, ":termo_desc" => $like, ":termo_cat" => $like]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-  //CREATE -> cadastra nova peça no estoque
-  public function salvar(array $dados): bool {
+    // ---------- Ex. 3: paginação ----------
+
+    // Conta as peças ativas (consulta constante, sem dados externos)
+    public function contarTodas(): int
+    {
+        $sql = "SELECT COUNT(*) FROM pecas_industriais WHERE ativo = TRUE";
+
+        return (int) $this->pdo->query($sql)->fetchColumn();
+    }
+
+    // Lista uma página do catálogo; LIMIT e OFFSET vinculados como inteiros
+    public function listarPagina(int $limite, int $offset): array
+    {
+        $sql = "SELECT * FROM pecas_industriais WHERE ativo = TRUE
+                ORDER BY id LIMIT :limite OFFSET :offset";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(":limite", $limite, PDO::PARAM_INT);
+        $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // ---------- CREATE / UPDATE ----------
+
+    // Cadastra uma nova peça no estoque
+    public function salvar(array $dados): bool
+    {
         $sql = "INSERT INTO pecas_industriais
                 (codigo_sku, descricao, categoria, quantidade, preco_unitario)
                 VALUES (:sku, :descricao, :categoria, :quantidade, :preco)";
         $stmt = $this->pdo->prepare($sql);
-        $resultado = $stmt->execute([
-            ":sku"           => strtoupper(trim($dados["codigo_sku"])),
-            ":descricao"     => trim($dados["descricao"]),
-            ":categoria"     => trim($dados["categoria"]),
-            ":quantidade"    => (int)$dados["quantidade"], //(int) => cast de dados -> converte para formato numero o variável
-            ":preco"         => (float)$dados
-            ["preco_unitario"] // CAST => (float)
+
+        return $stmt->execute([
+            ":sku"        => strtoupper(trim($dados["codigo_sku"])),
+            ":descricao"  => trim($dados["descricao"]),
+            ":categoria"  => trim($dados["categoria"]),
+            ":quantidade" => (int) $dados["quantidade"],
+            ":preco"      => (float) $dados["preco_unitario"],
         ]);
-        return $resultado; // retornar se deu certo (true) ou não (false)
     }
 
-    public function atualizar(int $id, array $dados): bool {
+    // Atualiza uma peça; o WHERE estrito por ID evita alterar outras linhas
+    public function atualizar(int $id, array $dados): bool
+    {
         $sql = "UPDATE pecas_industriais
-                SET codigo_sku = :sku,
-                    descricao = :descricao,
-                    categoria = :categoria,
-                    quantidade = :quantidade,
-                    preco_unitario = :preco
+                SET codigo_sku = :sku, descricao = :descricao, categoria = :categoria,
+                    quantidade = :quantidade, preco_unitario = :preco
                 WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
 
-        $resultado = $stmt->execute([
-                                    ":id"         => $id,
-                                    ":sku"        => strtoupper(trim($dados["codigo_sku"])),
-                                    ":descricao"  => trim($dados["descricao"]),
-                                    ":categoria"  => trim($dados["categoria"]),
-                                    ":quantidade" => (int)$dados["quantidade"],
-                                    ":preco"      => (float)$dados["preco_unitario"]
-                                    ]);
-        return $resultado;
+        return $stmt->execute([
+            ":id"         => $id,
+            ":sku"        => strtoupper(trim($dados["codigo_sku"])),
+            ":descricao"  => trim($dados["descricao"]),
+            ":categoria"  => trim($dados["categoria"]),
+            ":quantidade" => (int) $dados["quantidade"],
+            ":preco"      => (float) $dados["preco_unitario"],
+        ]);
     }
 
- //DELETE -> Exlcuir Dado do Banco
-    public function excluir(int $id):bool {
-        $sql="DELETE FROM pecas_industriais WHERE id = :id";
-        $stmt = $this->pdo->prepare($sql);
+    // ---------- Ex. 5: exclusão lógica (substitui o DELETE físico) ----------
+
+    // Marca a peça como inativa em vez de apagar o registro
+    public function excluir(int $id): bool
+    {
+        $stmt = $this->pdo->prepare("UPDATE pecas_industriais SET ativo = FALSE WHERE id = :id");
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
-        $resultado = $stmt->execute();
-        return $resultado;
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
     }
 
-    
+    // ---------- Ex. 4: transações ACID ----------
+
+    // Registra entrada/saída de estoque; false se falhar ou se o saldo ficar negativo
+    public function registrarMovimentacao(int $pecaId, int $quantidade, string $tipo): bool
+    {
+        if ($quantidade <= 0 || !in_array($tipo, ["ENTRADA", "SAIDA"], true)) {
+            return false;
+        }
+        try {
+            $this->pdo->beginTransaction();
+            $saldo = $this->buscarSaldoTravado($pecaId);
+            $novoSaldo = $tipo === "ENTRADA" ? $saldo + $quantidade : $saldo - $quantidade;
+            if ($novoSaldo < 0) {
+                $this->pdo->rollBack();
+                return false;
+            }
+            $this->atualizarSaldo($pecaId, $novoSaldo);
+            return $this->pdo->commit();
+        } catch (Throwable $erro) {
+            return $this->desfazer();
+        }
+    }
+
+    // Lê o saldo bloqueando a linha (evita corrida entre saídas simultâneas)
+    private function buscarSaldoTravado(int $pecaId): int
+    {
+        $sql = "SELECT quantidade FROM pecas_industriais WHERE id = :id FOR UPDATE";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(":id", $pecaId, PDO::PARAM_INT);
+        $stmt->execute();
+        $saldo = $stmt->fetchColumn();
+        if ($saldo === false) {
+            throw new RuntimeException("Peça não encontrada.");
+        }
+
+        return (int) $saldo;
+    }
+
+    // Grava o novo saldo da peça
+    private function atualizarSaldo(int $pecaId, int $novoSaldo): void
+    {
+        $sql = "UPDATE pecas_industriais SET quantidade = :saldo WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(":saldo", $novoSaldo, PDO::PARAM_INT);
+        $stmt->bindValue(":id", $pecaId, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    // Cancela a transação pendente (se houver) e sinaliza falha
+    private function desfazer(): bool
+    {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+
+        return false;
+    }
 }
