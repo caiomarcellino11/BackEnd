@@ -1,7 +1,12 @@
 <?php
 declare(strict_types=1);
 
+
+namespace App\Core;
 //Criar a Classe responsável por fornecer uma instancia única de conexão usando PDO com o Banco de Dados (Singleton)
+
+use PDO;
+
 
 final class ConexaoBanco{
     //atributos => são as caracteristicas do objeto

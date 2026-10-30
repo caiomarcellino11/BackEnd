@@ -1,7 +1,15 @@
 <?php
 declare(strict_types=1);
 
+namespace App\Models;
+
+use App\Core\ConexaoBanco;
 use PDO;
+use App\Core\Logger;
+use Throwable;
+use DomainException;
+
+
 
 final class Movimentacao {
     //criar o PDO
@@ -90,7 +98,5 @@ final class Movimentacao {
         $stmt->execute();
         return $stmt->fetchAll();
     }
-
-
 
 }

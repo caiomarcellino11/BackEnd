@@ -1,10 +1,18 @@
 <?php
 declare(strict_types=1);
 
+namespace App\Controllers;
+
+use App\Core\Controller;
+use App\Core\Guard\AuthGuard;
+use App\Models\Movimentacao;
+use App\Models\Produto;
+use DomainException;
+
 final class MovimentacaoController extends Controller {
 
-    //formulario para registrar movimentacao
- public function formulario(): void {
+    //fomrulário para registrar movimentação
+    public function formulario(): void {
         $produtoId = (int)($_GET['produto_id'] ?? 0);
         $produto = Produto::buscarPorId($produtoId);
         if (!$produto) {
@@ -16,8 +24,9 @@ final class MovimentacaoController extends Controller {
             'csrfToken' => $this->obterCsrfToken()
         ]);
     }
+
     //salvar a movimentação
-   public function salvar(): void {
+    public function salvar(): void {
         if (!$this->validarCsrfToken($_POST['csrf_token'] ?? null)) {
             $this->redirecionar('/produtos');
         }
@@ -41,9 +50,8 @@ final class MovimentacaoController extends Controller {
         }
     }
 
-
-    //listar os historico de movimentações
-        public function historico(): void {
+    //listar os histórico de movimentações
+    public function historico(): void {
         $movimentacoes = Movimentacao::listarHistorico(50);
         $this->renderizar('movimentacoes/historico', [
             'titulo'        => 'Histórico e Auditoria de Movimentações',

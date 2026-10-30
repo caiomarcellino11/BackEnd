@@ -9,6 +9,13 @@ if(session_status() === PHP_SESSION_NONE) {
 
 require_once dirname(__DIR__) . "/vendor/autoload.php";
 
+use App\Core\Roteador;
+
+use App\Controllers\AuthController;
+use App\Core\Guard\AuthGuard;
+use App\Controllers\HomeController;
+use App\Controllers\ProdutoController;
+use App\Controllers\MovimentacaoController;
 
 
 $roteador = new Roteador();

@@ -1,0 +1,12 @@
+[2026-10-30 17:46:49] [AVISO] [IP: ::1] Acesso anônimo redirecionado para login {"uri":"\/"}
+[2026-10-30 17:47:05] [AVISO] [IP: ::1] Falha na tentativa de login corporativo {"email":"caio11@gmail.com"}
+[2026-10-30 17:49:25] [AVISO] [IP: ::1] Acesso anônimo redirecionado para login {"uri":"\/"}
+[2026-10-30 17:51:03] [AVISO] [IP: ::1] Falha na tentativa de login corporativo {"email":"caio11@gamil.com"}
+[2026-10-30 17:59:32] [AVISO] [IP: ::1] Acesso anônimo redirecionado para login {"uri":"\/"}
+[2026-10-30 17:59:54] [AVISO] [IP: ::1] Falha na tentativa de login corporativo {"email":"caio@gmail.com"}
+[2026-10-30 18:00:29] [AVISO] [IP: ::1] Falha na tentativa de login corporativo {"email":"caio@gamil.com"}
+[2026-10-30 18:02:02] [AVISO] [IP: ::1] Acesso anônimo redirecionado para login {"uri":"\/"}
+[2026-10-30 18:02:07] [AVISO] [IP: ::1] Falha na tentativa de login corporativo {"email":"admin@senai.supply"}
+[2026-10-30 18:04:02] [AVISO] [IP: ::1] Acesso anônimo redirecionado para login {"uri":"\/"}
+[2026-10-30 18:04:22] [AVISO] [IP: ::1] Falha na tentativa de login corporativo {"email":"admin@senai.supply"}
+[2026-10-30 18:05:45] [INFO] [IP: ::1] Login corporativo bem-sucedido {"usuario_id":3,"perfil":"almoxarife"}

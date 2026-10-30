@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+namespace App\Core\Guard;
+
+use App\Core\Logger;
+
 final class AuthGuard {
     //Guard responsável por validar autenticação de sessão, perfil e auditar acessos
 
@@ -25,7 +29,7 @@ final class AuthGuard {
         }
     }
 
-  //verifica se existe um usuario autenticado
+    //verifica se existe um usuario autenticado
     public static function usuarioLogado(): bool {
         return !empty($_SESSION['usuario_id']);
     }
@@ -48,5 +52,4 @@ final class AuthGuard {
         echo "<p style='font-family:sans-serif;text-align:center;'><a href='/'>Voltar para o Painel</a></p>";
         exit;
     }
-
 }
