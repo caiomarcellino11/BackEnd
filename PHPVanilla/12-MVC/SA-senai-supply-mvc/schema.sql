@@ -40,3 +40,5 @@ INSERT INTO produtos (nome, categoria, preco, estoque) VALUES
 ('Paquímetro Digital de Precisão 150mm', 'Metrologia', 280.00, 8),
 ('Óleo Solúvel Sintético para Corte 5L', 'Lubrificação', 115.90, 40)
 ON CONFLICT (id) DO NOTHING;
+
+--- Criar 3 perfis de Usuário 

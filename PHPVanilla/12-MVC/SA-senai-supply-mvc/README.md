@@ -30,6 +30,10 @@ O sistema deve blindar o acesso por perfis de operadores, garantir a integridade
 ## Requsitos do Sistemas
 
 ### 4.1 Requisitos Funcionais (RF)
+>Requisitos Funcionais (RF)
+
+>Definem o que o **sistema deve fazer**, ou seja, as ações, comportamentos e capacidades concretas entregues ao usuário.
+>O que são: Regras de negócio, cálculos, fluxos de trabalho e interações com o usuário ou outros sistemas.
 
 - **RF-001** - Autenticação de Usuários: O sistema deve autenticar o usuário por e-mail e senha
 - **RF-002** - Logout Seguro: O encerramento da sessão deve ocorrer exclusivamento via `POST/logout`
@@ -44,6 +48,11 @@ O sistema deve blindar o acesso por perfis de operadores, garantir a integridade
 - **RF-011** - Registro de Logs : aramazenar eventos de logs em logs/app.log
 
 ### 4.2 Requisitos Não Funcionais (RNF)
+>Requisitos Não Funcionais (RNF)
+
+>Definem **como o sistema executa as funções**, estabelecendo restrições, padrões de qualidade e critérios de desempenho (muitas vezes chamados de "ilities").
+
+>O que são: Atributos relacionados a velocidade, segurança, usabilidade, confiabilidade e infraestrutura.
 
 - **RNF-001** - Segurança de Senhas: Usar criptografia para salvar as senhas no banco 
 - **RNF-002** - Integridade Transacional (ACID): Movimentações devem usar PDO
@@ -155,7 +164,23 @@ Criar o arquivo `composer.json` na raiz do projeto
 
 #### Criar o Arquivo `config/database.ini`
 
+Envelopamento de dados sensíveis
+
 #### criar o Arquivo ConexaoBanco (`src/core/conexaoBanco`)
 
+O mesmo sempre formato Singleton (um obj por vez)
+
 ### Criar a Classe de Looger do sistema (`src/core/Logger.php`)
+
+identificar erros e permitir correções corretas, erros detalhados para administradores do sistema
+
+## Montagem da Arquitetura MVC (Model - View - Controller)
+
+### Modelagem do Sistema o Model (`src/Models`)
+
+#### Usuários (`src/Models/Usuario.php`)
+
+#### Produtos (`src/Models/Produto.php`)
+
+#### Movimentação (``src/Models/Movimentacao.php`)
 
