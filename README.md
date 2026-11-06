@@ -2352,3 +2352,197 @@ mindmap
       php artisan tinker
       php artisan route:list
 ```
+
+---
+
+### Semana 14 - Rotas HTTP, Controllers de Recursos e Injeçãi de Dependência no Laravel
+
+**Tema**: Roteamento HTTP, Arquitetura Restful e Verbos HTTP (GET, POST, PUT, PATCH, DELETE), Parâmetro de Rotas, Rotas Nomeadas, Controllers de Recursos (CRUD Padronizado), Injeção de Dependência via Service Container, Method Spooting, Proteção contra ataque @CSRF e Inspeção de Rotas.
+
+#### **1. O Protocolo HTTP no Laravel**
+
+Nas aplicações web legadas ou amadores, é comum encontrar estruturas de URLs desorganizadas e perigosas que violam as boas práticas de engenharia de software eda segurança da informação.
+Observe este exemplo de código inseguro:
+
+```html
+<!-- Exemplo Legado Vulnerável: Ações destrutivas executadas via GET-->
+ <a href="excluir_cliente.php?id=10">Excluir Cliente</a>
+ ```
+este tipo de código pode Gerar uma ação destrutiva ao usar o código de mapeamento com o **GET**, a aplicação fica exposta a desastres selenciosos:
+1. **Robôs de Busca e Indexadores (*Web Crawlers*)**: Robôs como googlebot ou indexadores vasculham links `<a>` das páginas. se encontram o link de exclusão, eles seguirão a URL e **Apagarão todos os registro de banco de dados automaticamente**.
+
+2. **pre-Carregamento do Navegador**: Navegadores modernos tentam acelerar a navegação fazendo requisições em segundo plano para links visíveis na tela. se o link de deletar estiver lá, a conta do cliente é excluida antes mesmo de o usuário cliclar para deletar.
+
+3. **Histórico e Compartilhamento**: URLs GET com parâmetros destrutivos ficam salvas no histórico do navegador, em favoritos e em logs de servidores proxy. podendo ser acessadas indevidamente. 
+
+```mermaid
+flowchart LR
+    subgraph Inseguro ["Abordagem Legada (Insegura e Caótica)"]
+        l1["GET /listar_clientes.php"]
+        l2["GET /cadastrar_cliente.php"]
+        l3["POST /salvar_cliente.php"]
+        l4["GET /editar_cliente.php?id=10"]
+        l5["GET /deletar_cliente.php?id=10 (Perigo!)"]
+    end
+
+    subgraph RESTful ["Arquitetura RESTful no Laravel 11 (Padronizada)"]
+        r1["GET /clientes (Listar)"]
+        r2["POST /clientes (Criar)"]
+        r3["GET /clientes/{id} (Detalhar)"]
+        r4["PUT /clientes/{id} (Atualizar)"]
+        r5["DELETE /clientes/{id} (Excluir Seguro)"]
+    end
+
+    style Inseguro fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    style RESTful fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+```
+
+**A Mudança na filosofia da Arquitetura REST(*Representation State Tranfer*) no laravel**
+
+Na Arquitetura Restful adotada pelo Laravel:
+- A **URI**(O endereço) representa o **recurso** no plural `/clientes`, `/ativos`, `/pecas`.
+- O **Verbo HTTP** indica a **ação** que deseja executar sobre aquele recurso.
+- O mesmo endereço `/cliente/10` tem significado completamente defirentes e seguros dependendo do métodos HTTP enviado pelo cliente
+
+```html
+@delete
+<a href= "/clientes/10">Excluir Clientes</a>
+```
+
+**A matriz de verbos HTTP no Laravel**
+
+O protocolo HTTP/1.1 define verbos com semânticas bem delineadas que o Laravel implementa de forma declarativa e expressiva:
+
+| Verbo HTTP | Intenção de Engenharia | É Seguro? | É Idempotente? | Uso Típico no Laravel |
+| :---: | :--- | :---: | :---: | :--- |
+| **GET** | Recuperar dados sem causar efeitos colaterais no servidor. | **Sim** | **Sim** | Exibir telas, consultar listagens e buscar detalhes. |
+| **POST** | Criar um novo recurso subordinado no servidor. | **Não** | **Não** | Submeter formulários de cadastro e criar registros. |
+| **PUT** | Substituir integralmente um recurso existente no servidor. | **Não** | **Sim** | Atualizar todos os dados cadastrais de um cliente. |
+| **PATCH** | Modificar parcialmente campos específicos de um recurso. | **Não** | **Não** | Alterar apenas o status de um cliente (ex.: ATIVO para INATIVO). |
+| **DELETE** | Remover ou inativar permanentemente o recurso especificado. | **Não** | **Sim** | Excluir um cliente ou contrato de manutenção. |
+
+> **Conceito de Idempotente**
+> Uma requisição é dita **idempotente** quando executada uma única vez ou dez vezes consecutivas e resultar exatamente na mesma resposta pelo servidor
+> `DELETE/clientes/10` é idempotente (após a primeira exclusão, não tem mais o que exvluir), posso executar várias vezes e o resultado é sempre o mesmo 
+> `POST/clientes` não é idempotente (se vc clicar 10 vezes cada vez irá criar um novo cliente no sostema), a não ser, que exista uma trava no sistema, para evitar criar clintes duplicados.
+
+#### **2. Controllers de Recursos**
+
+Em Aplicações corporativas ou modernas, praticamente todas as entidades de negócio necessitam da mesma operações fundamentais
+-> CRUD(**Listar, Exibir, Detalhar, criar, editar, atualizar e Excluir**)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Navegador as Navegador Web
+    participant Router as routes/web.php
+    participant Ctrl as ClienteController
+    participant View as Blade / Resposta
+
+    Note over Router: Route::resource('clientes', ClienteController::class);
+
+    Navegador->>Router: GET /clientes
+    Router->>Ctrl: index()
+    Ctrl-->>View: Renderiza listagem completa
+
+    Navegador->>Router: GET /clientes/create
+    Router->>Ctrl: create()
+    Ctrl-->>View: Renderiza formulário em branco
+
+    Navegador->>Router: POST /clientes
+    Router->>Ctrl: store(Request $request)
+    Ctrl-->>View: Persiste e redireciona (302)
+
+    Navegador->>Router: GET /clientes/{id}
+    Router->>Ctrl: show($id)
+    Ctrl-->>View: Renderiza detalhes do parceiro
+
+    Navegador->>Router: GET /clientes/{id}/edit
+    Router->>Ctrl: edit($id)
+    Ctrl-->>View: Renderiza formulário pré-preenchido
+
+    Navegador->>Router: PUT /clientes/{id}
+    Router->>Ctrl: update(Request $request, $id)
+    Ctrl-->>View: Atualiza e redireciona (302)
+
+    Navegador->>Router: DELETE /clientes/{id}
+    Router->>Ctrl: destroy($id)
+    Ctrl-->>View: Remove e redireciona (302)
+```
+
+**Geração via Artisan CLI do Controller**
+
+```bash
+php artisan make:controller ClienteControler --resource
+```
+o comando acima cria o arquivo `app/http/Constrollers/ClienteController.php` já com as 7 assinaturas de métodos prontas para implementação
+
+**Mapeamento das Rotas Única**
+
+//routes/web.php
+`Route::resorce("clientes", ClienteControlller::class);`
+
+ao usar código é criado todas as rotas de navegação para os métodos do controller
+
+**Inspeção de Rotas no Terminal**
+
+```bash
+php artisan route:list
+```
+
+```text
+  GET|HEAD        clientes ................... clientes.index › ClienteController@index
+  POST            clientes ................... clientes.store › ClienteController@store
+  GET|HEAD        clientes/create ............ clientes.create › ClienteController@create
+  GET|HEAD        clientes/{cliente} ......... clientes.show › ClienteController@show
+  PUT|PATCH       clientes/{cliente} ......... clientes.update › ClienteController@update
+  DELETE          clientes/{cliente} ......... clientes.destroy › ClienteController@destroy
+  GET|HEAD        clientes/{cliente}/edit .... clientes.edit › ClienteController@edit
+```
+
+**Leitura de informações das páginas**
+
+No PHP procedural, acess-ase dados brutos através de superglobais inseguras: `$_POST["name"]` ou `$_GET["name"]`. No Laravel, essa abordagem é expressamente proibida. Em vez disso, usamos o **Service Container** do framework através da **Injeção de Dependências do tipo**
+
+**Demostração de um Exemplo Prático**
+
+```php
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+
+final class ClienteController extends Controller {
+    /**
+     * Salva o novo cliente injetando a requisicao HTTP com tipagem estrita.
+     */
+    public function store(Request $request): RedirectResponse {
+        // 1. Validacao rapida de integridade
+        $validados = $request->validate([
+            'razao_social' => 'required|min:3',
+            'cnpj'         => 'required'
+        ]);
+
+        // 2. Extracao segura de campos
+        $razaoSocial = (string)$request->input('razao_social');
+        $cnpj = (string)$request->input('cnpj');
+
+        Cliente::create($validados); //insere os dados no banco
+
+        // 3. Verificacao de presenca de dados
+        if ($request->has('email')) {
+            $email = (string)$request->input('email');
+        }
+
+        return redirect()->route('clientes.index');
+    }
+}
+```
+
+ > Basta declarar o parâmetro `Request $request`na assinatura  do método do Controller. O Laravel inspeciona a assinatura via *Preflection API*, instancia o objeto com os dados da requisição e entrega pronto para uso.
+
+
+#### **3. Roteameto Declarativo e Parâmetros no Laravel**
+
+
+
