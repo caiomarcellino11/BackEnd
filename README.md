@@ -2544,5 +2544,63 @@ final class ClienteController extends Controller {
 
 #### **3. Roteameto Declarativo e Parâmetros no Laravel**
 
+Nunca digite URLs(rotas) diretamente no HTML, como `<a href= "clintes/10/editar">`. se o time de produção/desenvolvimento decidir renomear a rota para `/clientes/10/modificar`, será necessário alterar centenas de arquivos manualmente. Para evitar essa situação nos criamos no arquivo `routes/web.php` as **Rotas Nomeadas**. Com isso, atribuimos apenlidos únicos à rota e usamos o helper global `route()`:
+para declarar essa rotas no arquivo html
+
+
+**Exemplo**:
+```php 
+//Definição de rotos no routes/web.php
+Route::get("/clientes/{id}/editar", [ClientesController::class],"edit") -> name("clientes.edit");
+
+//Utilizamos no tempalte Blade<VIew HTML> ou no Controller:
+//Gerando automaticamente a rota : http://seuEndereco:Porta/clientes/10/editar
+$url = route("clientes.edit", ["id" => 10]);
+```
+#### **4. Seguraça em Formulários: proteção CSRF e Método Spoofing**
+
+**Proteção contra **Cross-Site Request Forgery** (`@csrf`)
+
+O ataque CSRF ocorre quando um site malicioso força o navegador de um usuário autenticado a enviar comandos insejados para a sua aplicação sem o consentimento dele. O Laravel neutraliza esse ataque gerando um token criptografado único por sessão. todo formulário POST, PUT, ou DELETE deve incluir a diretiva no Blade
+
+```html
+<form action="{{'clintes.store'}}" methodo="POST">
+    @csrf
+    <!-- O Blade gera -->
+     <input type= "hidden" name="_token" value="dfrefg...">
+ </form>
+ ```
+
+>[OBS!!!]
+>Se você esquecer a diretiva @csrf em um formulário POST, o Laravel interceptará a requisição e abordará imediatamente com o erro de segurança **HTTP 419 - PAGE EXPIRED**!
+
+**Simulação de Métodos HTTP (Method Spoofing com `@method`):**
+
+A especificação do HTML5 possui limitações históricas conhecidas em formulários: **HTML suportam nativamente apenas os métodos `GET` e `POST` no atributo `method="..."`**
+
+Como enviar requições `PUT` para atualizar ou `DELETAR` para excluir dados através de formulários web padrão?
+
+O Laravel resolve isso através da técnica de **Method Spoofing**: definido o formulários com `method="POST"` e injetando o campo oculto `_method` através da diretiva Blade `@method("VERBO")`:
+
+*Exemplos de aplicação:*
+
+Formulário de Atualização (PUT):
+```blade
+<form action="{{ route('clientes.update', $cliente['id']) }}" method="POST">
+    @csrf
+    @method('PUT')
+    <!-- O Blade gera: <input type="hidden" name="_method" value="PUT"> -->
+    <button type="submit">Salvar Alterações</button>
+</form>
+```
+
+Botão de Exclusão Destrutiva (DELETE):
+```blade
+<form action="{{ route('clientes.destroy', $cliente['id']) }}" method="POST" onsubmit="return confirm('Confirmar exclusão?');">
+    @csrf
+    @method('DELETE')
+    <button type="submit" style="color:red;">Excluir Parceiro</button>
+</form>
+```
 
 

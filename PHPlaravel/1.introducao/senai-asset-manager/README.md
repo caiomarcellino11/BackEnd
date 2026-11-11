@@ -1,13 +1,13 @@
-# Meu Primeiro Projeto Laravel - SENAI Asset Managem (Sistema de gestão de ativos Industriais e maquinários)
+# Meu Primeiro Projeto Laravel - SENAI Asset Managem (Sistema de gestão de ativos Industriais e Maquinários)
 
 ## 1 . Criação da Aplicação Laravel
 
-Abra o terminal do VS code na pasta que deseja adicionar o projeto 
+Abra o terminar do VS code na Pasta que deseja adicionar o projeto 
 
 ```bash
-php --version       # verificar a versão do php
+php --version       # verifica a versão do PHP
 
-composer --versio   # verificar a versão do Composer
+composer --version  # verifica a versão do Composer
 
 #cria o projeto dentro da passta
 composer create-project laravel/laravel nome-do-projeto
@@ -16,46 +16,45 @@ composer create-project laravel/laravel nome-do-projeto
 cd nome-do-projeto
 ```
 
-## 2. Configurar o arquivo de blindagem `.env`
+## 2. Configurar o arquvio de blidagem `.env`
 
-abrir o arquivo e configurar os parâmetros
+Abrir o arquivo e configurar os parâmetros 
 
-configurar as informações das variáveis de Ambiente para o projeto
+configurr as informações das variáveis de Ambiente para o projeto
 
 e inserir a chave de criptografia caso não tenha
 
 ```bash
-php arisan key:generate
+php artisan key:generate
 ```
 
-### 3. Ispecionar e homolar a aplicação com `php artisan about`
+## 3. Inspecionar e Homologar a aplicação com `php artisan about`
 
-Inpecionar
-
+Inspecionar
 `php artisan about`
 
-Homologar
+Homologar 
 `php artisan serve`
 
-## Criação Dos Models
+## Criação dos Models
 
-Gerar o Model para Representar as Máquinas/Equipamentos do Sistema
+Geral o Model para Representar as Máquinas/Equipamentos do Sistema
 
-Criar uma classe chamado ativo
+Criar uma Classe Chamada Ativo
 
-`php artisan make:Model ativo`
+`php artisan make:Model Ativo`
 
-preencha com as informações da tabela
+preenchar com as informações da tabela
 
 $table => refere-se ao nome da tabela no banco de dados
 
-$fillable => refere-se as clunas que serão adicionadas a tabela
+$fillable => refere-se as colunas(atributos) que serão adicionadas a tabela
 
 ## 4. Criação do Controller
 
-`php artisan make:controller ativoController`
+`php artisan make:controller AtivoController`
 
-app/http/controller/ativoController.php
+app/Http/Controller/AtivoController.php
 
 criação de dois métodos 
 
@@ -140,16 +139,18 @@ Execute a sequência de 7 testes de validação técnica no laboratório:
    Execute `php artisan about` no terminal.  
    *Resultado Esperado:* Todos os indicadores técnicos devem estar validados em verde.
 
-# Continuando a palicação - Criação do módulo Gerenciamento de Clintes
+# Continuando a Aplicação - Criação do Módulo Gerenciamento de Clientes
 
 ## Criação do Model e Migração do Banco de Dados
 
-Criar o arquivo de migração e model com o comando
+Criar o arquivo de migração e o model com o comando 
 
 `php artisan make:model Cliente -m`
 
-- um arquivo database/migration -> inserir a tabela no banco
-- um arquivo no `app/model` -> gerenciador do Modelo de relacional 
+>obs: Ao usar a flag '-m' o Laravel criar 2 arquivos o Model e o migration
+
+- um arquivo no `databa/migration` -> inserir a tabela no banco
+- um arquivo no `app/Model` -> gerenciador do Modelo de relacional
 
 comando para Automação do Banco
 
@@ -161,6 +162,28 @@ Executar o Comando
 
 `php artisan make:controller ClienteController --resource`
 
-- um arquivo é criado em `app/http/Controllers/ClienteController.php`
+>obs: ao usar flag `--resource` é criados 7 métodos automaticamente dentro do controller
 
-contendo os 7 método de assinatura do resource 
+- um arquivo é criado em `app/Http/Controllers/ClienteController.php`
+
+contendo os 7 método de assinatura do resource
+
+## Criar as Rotas Nomeadas para os Controllers dentro do Arquivo (`routes/web.php`)
+
+Depois de criar o model, executar a migração e implementar o controller, vamos declarar as rotas do módulo em `routes/web.php`
+
+Uso do elemnto Resource para gerar todas as Rotas do Controller
+
+`Route::resource()` => Gera todas as rotas do Controller
+
+## Contrução das Views Blade 
+
+Criar o diretório `resources/views/clientes` =>
+
+Criar os Arquivos dentro da pasta `/clientes`
+
+index.blade.php
+create.blade.php
+show.blade.php
+edit.blade.php
+
