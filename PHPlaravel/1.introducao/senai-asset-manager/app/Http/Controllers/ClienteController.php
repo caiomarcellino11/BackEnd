@@ -37,11 +37,11 @@ class ClienteController extends Controller
     {
         $dados = $request->validate([
             "razao_social" => "required | min:3",
-            "cnpj"         => "required | unique:cliente,cnpj", // 
+            "cnpj"         => "required | unique:clientes,cnpj", // 
             "setor"        => "required"
         ]);
         // fazer o cadastro no banco
-        Cliente::crete($dados);
+        Cliente::create($dados);
         return redirect()->route("clientes.index")->with("sucesso", "Cliente Cadastrado com sucesso");
     }
 
