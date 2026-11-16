@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\AtivoController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\Produtocontroller;
 use Illuminate\Support\Facades\Route;
 
 Route::get("/", [AtivoController::class, "index"])->name("ativos.index");
@@ -19,3 +20,5 @@ route::get("/clientes/setor/{setor?}",
 
 //Rota RESTful (GET, POST, PUT/PATCH, DELETE)
 Route::resource("clientes", ClienteController::class)->whereNumber("cliente");
+
+route::resource("produtos", Produtocontroller::class)->whereNumber("produto");

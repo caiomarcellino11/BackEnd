@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $titulo }}</title>
+    <title>{{ $titulo ?? 'Novo Cadastro de Parceiro Industrial' }}</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; margin: 0; color: #f8fafc; }
         .container { max-width: 650px; margin: 40px auto; padding: 0 20px; }
@@ -15,40 +15,52 @@
         .btn-salvar { background: #0284c7; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-salvar:hover { background: #0369a1; }
         .link-voltar { color: #94a3b8; text-decoration: none; font-size: 0.9rem; margin-right: 15px; }
+        .alerta-erro { background: #7f1d1d; border: 1px solid #dc2626; color: #fecaca; padding: 12px; border-radius: 6px; margin-bottom: 20px; }
+        .alerta-erro ul { margin: 0; padding-left: 18px; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="card">
-        <h1>📝 {{ $titulo }}</h1>
+        <h1>🏭 {{ $titulo ?? 'Novo Cadastro de Parceiro Industrial' }}</h1>
 
-        <!-- Envio POST obrigatorio com diretiva @csrf -->
+        @if ($errors->any())
+            <div class="alerta-erro">
+                <ul>
+                    @foreach ($errors->all() as $erro)
+                        <li>{{ $erro }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form action="{{ route('clientes.store') }}" method="POST">
             @csrf
 
             <div class="form-group">
                 <label for="razao_social">Razão Social</label>
-                <input type="text" id="razao_social" name="razao_social" required placeholder="Ex.: Parker Hannifin do Brasil">
+                <input type="text" id="razao_social" name="razao_social" value="{{ old('razao_social') }}" required>
             </div>
 
             <div class="form-group">
-                <label for="cnpj">CNPJ</label>
-                <input type="text" id="cnpj" name="cnpj" required placeholder="00.000.000/0000-00">
+                <label for="cnpj">CNPJ Corporativo</label>
+                <input type="text" id="cnpj" name="cnpj" value="{{ old('cnpj') }}" placeholder="00.000.000/0000-00" required>
             </div>
 
             <div class="form-group">
                 <label for="setor">Setor Industrial</label>
                 <select id="setor" name="setor" required>
-                    <option value="Autopeças">Autopeças</option>
-                    <option value="Usinagem">Usinagem</option>
-                    <option value="Robótica">Robótica</option>
-                    <option value="Siderurgia">Siderurgia</option>
+                    <option value="">Selecione o setor</option>
+                    <option value="Autopeças" @selected(old('setor') === 'Autopeças')>Autopeças</option>
+                    <option value="Usinagem" @selected(old('setor') === 'Usinagem')>Usinagem</option>
+                    <option value="Robótica" @selected(old('setor') === 'Robótica')>Robótica</option>
+                    <option value="Siderurgia" @selected(old('setor') === 'Siderurgia')>Siderurgia</option>
                 </select>
             </div>
 
             <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:20px;">
                 <a href="{{ route('clientes.index') }}" class="link-voltar">← Cancelar</a>
-                <button type="submit" class="btn-salvar">Cadastrar Parceiro (POST)</button>
+                <button type="submit" class="btn-salvar">Cadastrar Parceiro</button>
             </div>
         </form>
     </div>

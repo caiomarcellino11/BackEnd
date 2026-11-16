@@ -50,7 +50,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down($markdowngrading): void
+    public function down(): void
     {
         Schema::dropIfExists('jobs');
         Schema::dropIfExists('job_batches');

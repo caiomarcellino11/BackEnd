@@ -23,7 +23,7 @@ class ClienteController extends Controller
     /**
      * exibir um Formulário para cadastro de novos clientes
      */
-    public function create() : View
+    public function create(): View
     {
         return view("clientes.create", [
             "titulo" => "Novo Cadastro de Parceiro Industrial"

@@ -18,6 +18,10 @@
         .footer-note { text-align: center; margin-top: 40px; color: #64748b; font-size: 0.85rem; border-top: 1px solid #1e293b; padding-top: 20px; }
         .btn-status { display: inline-block; background: #10b981; color: #022c22; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.85rem; margin-top: 15px; }
         .btn-status:hover { background: #34d399; }
+        .acoes-rodape { margin-top: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .nav-modulos { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-modulo { color: #38bdf8; border: 1px solid #38bdf8; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.85rem; }
+        .btn-modulo:hover { background: #0369a1; border-color: #0369a1; color: white; }
     </style>
 </head>
 <body>
@@ -51,8 +55,12 @@
             </div>
         </div>
 
-        <div style="margin-top: 25px; text-align: right;">
-            <a href="{{ route('ativos.status') }}" target="_blank" class="btn-status">Inspecionar Endpoint de Diagnóstico JSON ➔</a>
+        <div class="acoes-rodape">
+            <div class="nav-modulos">
+                <a href="{{ route('clientes.index') }}" class="btn-modulo">👥 Clientes</a>
+                <a href="{{ route('produtos.index') }}" class="btn-modulo">📦 Produtos</a>
+            </div>
+            <a href="{{ route('ativos.status') }}" target="_blank" class="btn-status" style="margin-top: 0;">Inspecionar Endpoint de Diagnóstico JSON ➔</a>
         </div>
     </div>
 

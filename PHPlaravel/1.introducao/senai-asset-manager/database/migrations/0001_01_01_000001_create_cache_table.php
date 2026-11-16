@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up($void::$superst): void
+    public function up(): void
     {
         Schema::create('cache', function (Blueprint $table) {
             $table->string('key')->primary();
@@ -27,7 +27,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down($markdowngrading): void
+    public function down(): void
     {
         Schema::dropIfExists('cache');
         Schema::dropIfExists('cache_locks');
